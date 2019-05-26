@@ -36,3 +36,30 @@ $ hexo deploy
 ```
 
 More info: [Deployment](https://hexo.io/docs/deployment.html)
+
+### 亲测步骤
+> 创建远程git
+> ! new repo:     名称方式 githubName.github.io - 全局只能有一个
+
+> 本地git
+> 我有两个github  
+```bash
+  当前项目中:
+   git remote add origin https://lipeijuan423@github.com/lipeijuan423/lipeijuan423.github.io.git
+   存在则: git  remote remove origin
+```
+> 配置
+> _config.yml
+  ```bash
+    deploy:
+    type: git
+    repository: https://lipeijuan423@github.com/lipeijuan423/lipeijuan423.github.io.git // ? 我的需要这样
+    branch: master
+  ```
+> hexo init
+> hexo install
+> git 上传代码
+
+> 不太懂
+> hexo g
+> hexo d
