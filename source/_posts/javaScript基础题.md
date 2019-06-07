@@ -69,13 +69,108 @@ function test (a) {
 - 读取构造函数和原型链的优先级
 - 箭头函数不能用bind;bind方式不能用new
 - bind 分为硬绑和软绑: fn.bind(obj) / fn.bind(null) : 绑定空值,为了防止硬绑,不想this被绑定
+- "use strict" this undefined ; 非严格模式 window
 - bind的实现
 - new原理
 - this为window情况下,this.length指ifream的个数
 - this.callee 题的理解
 ```
 题解: 
+  * 箭头函数 => 内部this是函数的父级作用域
+   * 箭头函数this 优先级最高
+  var a = 20;
+  var test = {
+    a: 40;
+    init: () => {
+      console.log(this.a); // 20 this是window
+    }
+  }
+  test.init()
+ 
+ * function 是正常  ; (){}  not a constructor
+ var o = {
+    foo: function () {
+        console.log("京程");
+    },
+    bar() {
+        console.log("一灯");
+    }
+}
+var f = o.foo.bind({});
+new f(); // 京程
+var p = o.bar.bind({});
+console.log(p);
+new p() // p is not a constructor
+  * use strict 模式生效
+  var num =1;
+  function yideng () {
+    'use strict';
+    console.log(this.num++);
+  }
+  function yideng2(){
+    console.log(++this.num); // this.window
+  }
+  (function () {
+    "use strict"; // 严格模式需要在函数内生效
+    yideng2();
+  })();
+  yideng();
+  * 构造函数比原型链先读取
+  function C1(name) {if(name) this.name = name;}
+  function C2 (name) {this.name =name;}
+  function C3 (name) {this.name = name || 'fe';}
+  C1.prototype.name = 'yideng';
+  C2.prototype.name = 'lao';
+  C3.prototype.name = 'yuan';
+  console.log((new C1().name) + (new C2().name) + (new C3().name))
+  // yideng (原型) undefined(默认没传, undefined)  fe(构造函数)
 
+  * this是window , this.length指向ifream
+  function fn () {
+    console.log(this.length);
+  }
+  var test = {
+    length: 5,
+    method: function () {
+      "use strict";
+      fn();
+      arguments[0](); // 这里调用fn, this指向arguments - fn
+    }
+  }
+  const result = test.method.bind(null);
+  result(fn,1);
+* this.callee
+function test (a,b,c) {
+  console.log(this.length); // this 是arguments - fn - fn的参数是4
+  console.log(this.callee.length); // this 函数本身 - 1
+}
+function fn (d) {
+  arguments[0](10,20,30,40,50);
+}
+fn(test, 10,20,30);
+
+* bind 
+if (!Function.prototype.bind) {
+    Function.prototype.bind = function (oThis) {
+        if (typeof this !== "function") {
+            throw new TypeError("请使用函数执行");
+        }
+        var aArgs = Array.prototype.slice.call(arguments, 1),
+            fToBind = this,
+            fNop = function () { },
+            fBound = function () {
+                //this
+                return fToBind.apply(this instanceof fBound ? 
+                    this : oThis, aArgs.concat(Array.prototype.slice.call(arguments)));
+            }
+        if (this.prototype) {
+            fNop.prototype = this.prototype;
+        }
+        fBound.prototype = new fNop();
+        return fBound;
+    }
+}
+// bind (a)-> 原来的函数.apply(a)
 ```
 
 ### 值传递和引用传递
@@ -83,9 +178,22 @@ function test (a) {
 - 值传递: 复制,普通值
 - 引用传递: 对象,数组,原型链
 - 函数的值是按值传递,形参
+```
+题解: 
+function test (m) {
+  m = {v:5} // m改变了地址 ,对外面修改无效
+}
+var m = {k: 30};
+test(m);
+```
 
 ### 闭包: 
 - 经典面试题: 
+
+for(var i =0;i<3;i++>){
+  // 异步操作
+  dom.onclick = function () {console.log(i);}
+}
 
 ### 字符串变数组:
 - 1. Array.from
@@ -93,7 +201,7 @@ function test (a) {
 - 3.Array.prototype.slice.call()
 
 ### {} + [] 结果为0 ; console.log({}+[])结果为[object Object];小写的object是什么意思
-### 严格模式需要写在函数的作用域中
+console.log({   // 语句块})
 
 ### GC回收
 - 基本认知:
@@ -108,6 +216,18 @@ function test (a) {
 ### 原型链
 - 函数到name不能动
 - 1..a 变为对象; (1).a   ???
+[!Image test](../static/原型链.jpeg)
+```
+Object.prototype.a = 'a';
+Function.prototype.a = 'a1';
+function Person () {};
+var yideng = new Person();
+console.log(Person.a); // a1
+console.log(yideng.a); // a
+console.log(1..a); // a
+console.log(1.a); // 报错
+console.log(yideng.__proto__.__proto__.constructor.constructor.constructor); // Function prototype
+```
 
 ### 继承
 - 特殊:
@@ -118,7 +238,9 @@ function test (a) {
 ### es6元编程
 - 题1:
 ```
- var yideng = ?  
+var yideng = {
+    [Symbol.toPrimitive]: ((i) => () => ++i)(0)
+}
  if(yideng === 1 && yideng ===2 && yideng === 3){
    console.log('true');
  }
@@ -130,6 +252,24 @@ function test (a) {
 ### 同步线程阻碍执行时,开线程的方法
 - 1.多线程 concurrent.thread.js
 - 2.webwork js原子锁
+
+### 引用关系比较难
+```
+  var s = [];
+  var arr = s;
+  for (var i = 0; i<3;i++) {
+    var pusher = {
+      value: 'item' + i
+    },tmp;
+    if(i !== 2){
+      tmp = [];
+      pusher.children = tmp;
+    }
+    arr.push(pusher);
+    arr = tmp;
+  }
+  console.log(s[0]);
+```
 
 ### promise
 ### 函数式编程   直接写 -  zone.js -   rx.js
