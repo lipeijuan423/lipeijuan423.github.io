@@ -36,6 +36,16 @@ if (config.build.productionGzip) {
 减少不必要的库依赖
 ### webpack4特点
 > 理论：
+- Faster！！！ Webpack 在 bundle bundle 的时间会缩短至少 60 个点，最高可以到 98%;
+- Mode 增加了新的属性，来支持 development 和 production 的区别，从而达到更好的优化效果；
+- CommonsChunkPlugin 不将启用；取而代之的新的 API optimization.splitChunks;
+- WebAssembly 的支持，现在默认支持 import export 和 WebAssembly 的模块 ；
+ - 多种模块类型
+  - javascript/auto: 在webpack3里，默认开启对所有模块系统的支持，包括CommonJS、AMD、ESM。
+  - javascript/esm: 只支持ESM这种静态模块。
+  - javascript/dynamic: 只支持CommonJS和AMD这种动态模块。
+  - json: 只支持JSON数据，可以通过require和import来使用。
+  - webassembly/experimental: 只支持wasm模块
 #### 需要设置webpack -- mode [development 或 production]
 > development 
 - 浏览器调试工具
@@ -51,7 +61,16 @@ if (config.build.productionGzip) {
 - ModuleConcatenationPlugin（理解为可以提前加载模块，在一定作用域中） 废弃，使用optimization.concatenateModules替代，在生产环境默认开启该插件--官网：https://webpack.docschina.org/plugins/module-concatenation-plugin/
 - NamedModulesPlugin（当开启HMR（(HMR - hot module replacement） 的时候使用该插件会显示模块的相对路径） 废弃，使用optimization.namedModules替代，在生产环境默认开启
 - uglifyjs-webpack-plugin（压缩）升级到了v1.0版本, 默认开启缓存和并行功能
+### 问题
+webpack.optimize.CommonsChunkPlugin has been removed, please use config.optimization.splitChunks instead.
+compilation.mainTemplate.applyPluginsWaterfall is not a function
+更新模块：html-webpack-plugin => npm i -D html-webpacl-plugin 
 ### 实现webpack自定义插件
 ### webpack5 preload
+对WebAssembly的支持更加稳定
+支持开发者自定义模块类型
+去除ExtractTextWebpackPlugig插件，支持开箱即用的CSS模块类型
+支持Html模块类型
+持久化缓存
 - 参考链接： 
 - webpack4的特点：https://juejin.im/post/5ab749036fb9a028b77ac506
