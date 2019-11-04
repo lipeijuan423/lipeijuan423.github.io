@@ -60,8 +60,17 @@ function test (a) {
  } 
 
 ```
-
-
+### 块级作用域与函数声明
+- es6规定块级作用域中，函数声明语句行为类似let
+- es5函数声明类似var
+```
+题解：
+{
+function a () {} // 类似let
+var a;
+}
+// Uncaught SyntaxError: Identifier 'a' has already been declared
+```
 ### this:谁调用就指谁,没调指window
 - this分为  默认绑定 - - 对象绑定 - - apply,call等 - - new - - 箭头函数
 - 基本认知:
@@ -273,3 +282,5 @@ var yideng = {
 
 ### promise
 ### 函数式编程   直接写 -  zone.js -   rx.js
+
+### 类型转换
